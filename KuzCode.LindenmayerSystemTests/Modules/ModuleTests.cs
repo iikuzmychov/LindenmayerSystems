@@ -33,25 +33,5 @@ namespace KuzCode.LindenmayerSystem.Tests
             var actual = module1 == module2;
             Assert.AreEqual(expected, actual);
         }
-
-        private static object[][] NotNullModules
-        {
-            get
-            {
-                return new object[][]
-                {
-                    new object[] { new Module('F'), new ModuleTemplate('F') },
-                    new object[] { new Module('G'), new ModuleTemplate('G') },
-                };
-            }
-        }
-
-        [TestMethod]
-        [DynamicData(nameof(NotNullModules))]
-        public void GetTemplate_ModuleAndTemplate_ReturnsExpectedTemplate(Module module, ModuleTemplate expected)
-        {
-            var actual = module.GetTemplate();
-            Assert.AreEqual(expected, actual);
-        }
     }
 }
