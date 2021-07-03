@@ -9,7 +9,6 @@ namespace KuzCode.LindenmayerSystem
         private readonly List<Module> _axiom;
         private List<Module> _state;
         private readonly List<Producer> _producers;
-        private readonly Dictionary<ModuleTemplate, Producer> _producersDictionary;
 
         public IReadOnlyList<Module> Axiom => _axiom.AsReadOnly();
         public IReadOnlyList<Module> State => _state.AsReadOnly();
@@ -24,19 +23,26 @@ namespace KuzCode.LindenmayerSystem
             if (axiom.Any(axiom => axiom is null))
                 throw new ArgumentException("Sequence contains null-objects", nameof(axiom));
 
+            if (axiom.Any(module => module.IsUseableAsTemplateOnly))
+                throw new ArgumentException("Axiom sequence contains modules useable only as templates", nameof(axiom));
+
             if (producers is null)
                 throw new ArgumentNullException(nameof(axiom));
 
             if (producers.Any(producer => producer is null))
                 throw new ArgumentException("Sequence contains null-objects", nameof(producers));
 
-            if (producers.GroupBy(producer => producer.ModuleTemplate).Any(group => group.Count() > 1))
-                throw new ArgumentException("Producers sequence contains more than 1 producer for same module", nameof(producers));
+            if (producers
+                .Any(producer1 => producers
+                    .Any(producer2 => producer1.ModuleTemplate
+                        .IsMatchTemplate(producer2.ModuleTemplate))))
+            {
+                throw new ArgumentException("Producers sequence contains producers with the same templates or more stringent templates", nameof(producers));
+            }
 
-            _axiom               = axiom;
-            _state               = axiom;
-            _producers           = producers;
-            _producersDictionary = producers.ToDictionary(key => key.ModuleTemplate);
+            _axiom     = axiom;
+            _state     = axiom;
+            _producers = producers;
         }
 
         public IReadOnlyList<Module> NextStep()
@@ -47,12 +53,15 @@ namespace KuzCode.LindenmayerSystem
             {
                 var currentModule = _state[i];
 
-                if (_producersDictionary.ContainsKey(currentModule.GetTemplate()))
+                var producer = _producers
+                    .SingleOrDefault(producer => currentModule
+                        .IsMatchTemplate(producer.ModuleTemplate));
+
+                if (producer is not null)
                 {
-                    var previousModules = _state.Take(i).Select(module => module.GetTemplate()).ToList();
-                    var nextModules     = _state.Skip(i + 1).Select(module => module.GetTemplate()).ToList();
+                    var previousModules = _state.Take(i).ToList();
+                    var nextModules     = _state.Skip(i + 1).ToList();
                     var context         = new Producer.Context(previousModules, nextModules);
-                    var producer        = _producersDictionary[currentModule.GetTemplate()];
                     var newModules      = producer.Produce(currentModule, context);
 
                     newState.AddRange(newModules);
@@ -69,9 +78,6 @@ namespace KuzCode.LindenmayerSystem
             return State;
         }
 
-        public object Clone()
-        {
-            return new LSystem(_axiom.Clone(), _producers.Clone());
-        }
+        public object Clone() => new LSystem(new(_axiom), _producers.Clone());
     }
 }
