@@ -33,9 +33,18 @@ namespace KuzCode.LindenmayerSystem.Tests
                         new List<Module>(),
                         new List<Producer>()
                         {
-                            new Producer(new ModuleTemplate('F'), new List<Module>()),
-                            new Producer(new ModuleTemplate('F'), new List<Module>()), // same module
+                            new Producer(new Module('F'), new List<Module>()),
+                            new Producer(new Module('F'), new List<Module>()), // same template
                         } 
+                    },
+                    new object[]
+                    {
+                        new List<Module>(),
+                        new List<Producer>()
+                        {
+                            new Producer(new ParametricModule<int>('F', null), new List<Module>()),
+                            new Producer(new ParametricModule<int>('F', 0), new List<Module>()), // same more stringent template
+                        }
                     },
                 };
             }
@@ -93,13 +102,13 @@ namespace KuzCode.LindenmayerSystem.Tests
                     new object[]
                     {
                         new List<Module>() { new Module('F') },
-                        new List<Producer>() { new Producer(new ModuleTemplate('F'), new Module('G')) },
+                        new List<Producer>() { new Producer(new Module('F'), new Module('G')) },
                         new List<Module>() { new Module('G') },
                     },
                     new object[]
                     {
                         new List<Module>() { new Module('F'), new Module('F') },
-                        new List<Producer>() { new Producer(new ModuleTemplate('F'), new Module('G')) },
+                        new List<Producer>() { new Producer(new Module('F'), new Module('G')) },
                         new List<Module>() { new Module('G'), new Module('G') },
                     },
                     new object[]
@@ -108,7 +117,7 @@ namespace KuzCode.LindenmayerSystem.Tests
                         new List<Producer>()
                         {
                             new Producer(
-                                moduleTemplate: new ModuleTemplate('F'),
+                                moduleTemplate: new Module('F'),
                                 successors: new() { new Module('F'), new Module('G') })
                         },
                         new List<Module>() { new Module('F'), new Module('G') },
@@ -119,7 +128,7 @@ namespace KuzCode.LindenmayerSystem.Tests
                         new List<Producer>()
                         {
                             new Producer(
-                                moduleTemplate: new ModuleTemplate('F'),
+                                moduleTemplate: new Module('F'),
                                 successors: new() { new Module('F'), new Module('G') })
                         },
                         new List<Module>() { new Module('F'), new Module('G'), new Module('G') },
@@ -130,11 +139,11 @@ namespace KuzCode.LindenmayerSystem.Tests
                         new List<Producer>()
                         {
                             new Producer(
-                                moduleTemplate: new ModuleTemplate('F'),
+                                moduleTemplate: new Module('F'),
                                 successors: new() { new Module('F'), new Module('G') }),
 
                             new Producer(
-                                moduleTemplate: new ModuleTemplate('G'),
+                                moduleTemplate: new Module('G'),
                                 successors: new() { new Module('F') })
                         },
                         new List<Module>() { new Module('F'), new Module('G'), new Module('F') },
@@ -145,11 +154,11 @@ namespace KuzCode.LindenmayerSystem.Tests
                         new List<Producer>()
                         {
                             new Producer(
-                                moduleTemplate: new ModuleTemplate('F'),
+                                moduleTemplate: new Module('F'),
                                 successors: new() { new Module('F'), new Module('G') }),
 
                             new Producer(
-                                moduleTemplate: new ModuleTemplate('G'),
+                                moduleTemplate: new Module('G'),
                                 successors: new() { new Module('F') })
                         },
                         new List<Module>() { new Module('F'), new Module('G'), new Module('F'), new Module('F'), new Module('G'), },
@@ -160,10 +169,10 @@ namespace KuzCode.LindenmayerSystem.Tests
                         new List<Producer>()
                         {
                             new Producer(
-                                moduleTemplate: new ModuleTemplate('F'),
+                                moduleTemplate: new Module('F'),
                                 successor: new Module('G'),
                                 productionContext: new Producer.Context(
-                                    previousModules: new() { new ModuleTemplate('F') },
+                                    previousModules: new() { new Module('F') },
                                     nextModules: new()))
                         },
                         new List<Module>() { new Module('F'), new Module('G') },
@@ -174,11 +183,11 @@ namespace KuzCode.LindenmayerSystem.Tests
                         new List<Producer>()
                         {
                             new Producer(
-                                moduleTemplate: new ModuleTemplate('F'),
+                                moduleTemplate: new Module('F'),
                                 successor: new Module('G'),
                                 productionContext: new Producer.Context(
                                     previousModules: new(),
-                                    nextModules: new() { new ModuleTemplate('F') }))
+                                    nextModules: new() { new Module('F') }))
                         },
                         new List<Module>() { new Module('G'), new Module('F') },
                     },
@@ -188,11 +197,11 @@ namespace KuzCode.LindenmayerSystem.Tests
                         new List<Producer>()
                         {
                             new Producer(
-                                moduleTemplate: new ModuleTemplate('F'),
+                                moduleTemplate: new Module('F'),
                                 successor: new Module('G'),
                                 productionContext: new Producer.Context(
-                                    previousModules: new() { new ModuleTemplate('F') },
-                                    nextModules: new() { new ModuleTemplate('G') }))
+                                    previousModules: new() { new Module('F') },
+                                    nextModules: new() { new Module('G') }))
                         },
                         new List<Module>() { new Module('F'), new Module('G'), new Module('G') },
                     },
@@ -204,7 +213,7 @@ namespace KuzCode.LindenmayerSystem.Tests
                         new List<Producer>()
                         {
                             new Producer(
-                                moduleTemplate: new ParametricModuleTemplate<int>('F'),
+                                moduleTemplate: new ParametricModule<int>('F', null),
                                 successors: new() { new ParametricModule<int>('F', 1) })
                         },
                         new List<Module>() { new ParametricModule<int>('F', 1) },
@@ -215,10 +224,10 @@ namespace KuzCode.LindenmayerSystem.Tests
                         new List<Producer>()
                         {
                             new Producer(
-                                moduleTemplate: new ParametricModuleTemplate<int>('F'),
+                                moduleTemplate: new ParametricModule<int>('F', null),
                                 successors: new() { new ParametricModule<int>('F', 1) },
                                 productionContext: new Producer.Context(
-                                    previousModules: new() { new ModuleTemplate('B') },
+                                    previousModules: new() { new Module('B') },
                                     nextModules: new()))
                         },
                         new List<Module>() { new Module('A'), new Module('B'), new ParametricModule<int>('F', 1) },
@@ -229,7 +238,7 @@ namespace KuzCode.LindenmayerSystem.Tests
                         new List<Producer>()
                         {
                             new Producer(
-                                moduleTemplate: new ParametricModuleTemplate<int>('F'),
+                                moduleTemplate: new ParametricModule<int>('F', null),
                                 produceMethod: module
                                     => new() { new ParametricModule<int>(module.Symbol, (module as ParametricModule<int>).Parameter + 1) })
                         },
@@ -241,7 +250,7 @@ namespace KuzCode.LindenmayerSystem.Tests
                         new List<Producer>()
                         {
                             new Producer(
-                                moduleTemplate: new ParametricModuleTemplate<int>('F'),
+                                moduleTemplate: new ParametricModule<int>('F', null),
                                 produceMethod: module
                                     => new() { new ParametricModule<int>(module.Symbol, (module as ParametricModule<int>).Parameter + 1) })
                         },

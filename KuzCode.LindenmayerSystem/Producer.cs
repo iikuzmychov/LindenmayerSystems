@@ -14,15 +14,15 @@ namespace KuzCode.LindenmayerSystem
         #region Context
         public class Context : ICloneable
         {
-            private readonly List<ModuleTemplate> _previousModules;
-            private readonly List<ModuleTemplate> _nextModules;
+            private readonly List<Module> _previousModules;
+            private readonly List<Module> _nextModules;
 
-            public IReadOnlyList<ModuleTemplate> PreviousModules => _previousModules.AsReadOnly();
-            public IReadOnlyList<ModuleTemplate> NextModules => _nextModules.AsReadOnly();
+            public IReadOnlyList<Module> PreviousModules => _previousModules.AsReadOnly();
+            public IReadOnlyList<Module> NextModules => _nextModules.AsReadOnly();
 
             public static Context NoContext => new(new(), new());
 
-            public Context(List<ModuleTemplate> previousModules, List<ModuleTemplate> nextModules)
+            public Context(List<Module> previousModules, List<Module> nextModules)
             {
                 if (previousModules is null)
                     throw new ArgumentNullException(nameof(previousModules));
@@ -49,10 +49,11 @@ namespace KuzCode.LindenmayerSystem
                 if (otherContext._previousModules.Count > _previousModules.Count)
                     return false;
 
-                // comparing otherContext._previousModules and last N modules this._previousModules. N = difference of otherContext._previousModules
-                if (otherContext._previousModules
-                    .SequenceEqual(_previousModules
-                        .Skip(_previousModules.Count - otherContext._previousModules.Count)) == false)
+                // matching last N modules this._previousModules with otherContext._previousModules. N = difference of otherContext._previousModules
+                if (_previousModules
+                    .Skip(_previousModules.Count - otherContext._previousModules.Count)
+                    .Zip(otherContext._previousModules, (module, otherModule) => module.IsMatchTemplate(otherModule))
+                    .Any(isMatch => !isMatch))
                 {
                     return false;
                 }
@@ -60,10 +61,11 @@ namespace KuzCode.LindenmayerSystem
                 if (otherContext._nextModules.Count > _nextModules.Count)
                     return false;
 
-                // comparing otherContext._previousModules and first N modules this._previousModules. N = count of otherContext._nextModules
-                if (otherContext._nextModules
-                    .SequenceEqual(_nextModules
-                        .Take(otherContext._nextModules.Count)) == false)
+                // matching first N modules this._nextModules with otherContext._nextModules. N = difference of otherContext._nextModules
+                if (_nextModules
+                    .Skip(otherContext._nextModules.Count)
+                    .Zip(otherContext._nextModules, (module, otherModule) => module.IsMatchTemplate(otherModule))
+                    .Any(isMatch => !isMatch))
                 {
                     return false;
                 }
@@ -118,7 +120,7 @@ namespace KuzCode.LindenmayerSystem
         }
         #endregion
 
-        public ModuleTemplate ModuleTemplate { get; }
+        public Module ModuleTemplate { get; }
         public ProduceMethod ProduceMethod { get; }
 
         /// <summary>
@@ -126,7 +128,8 @@ namespace KuzCode.LindenmayerSystem
         /// </summary>
         public Context ProductionContext { get; }
 
-        public Producer(ModuleTemplate moduleTemplate, ProduceMethod produceMethod, Context productionContext)
+        #region Constructors
+        public Producer(Module moduleTemplate, ProduceMethod produceMethod, Context productionContext)
         {
             if (moduleTemplate is null)
                 throw new ArgumentNullException(nameof(moduleTemplate));
@@ -142,10 +145,10 @@ namespace KuzCode.LindenmayerSystem
             ProductionContext = productionContext;
         }
 
-        public Producer(ModuleTemplate moduleTemplate, ProduceMethod produceMethod)
+        public Producer(Module moduleTemplate, ProduceMethod produceMethod)
             : this(moduleTemplate, produceMethod, Context.NoContext) { }
 
-        public Producer(ModuleTemplate moduleTemplate, List<Module> successors, Context productionContext)
+        public Producer(Module moduleTemplate, List<Module> successors, Context productionContext)
             : this(moduleTemplate, module => successors, productionContext)
         {
             if (successors is null)
@@ -153,24 +156,28 @@ namespace KuzCode.LindenmayerSystem
 
             if (successors.Any(module => module is null))
                 throw new ArgumentException("Sequence contains null-objects", nameof(successors));
+
+            if (successors.Any(module => module.IsUseableAsTemplateOnly))
+                throw new ArgumentException("Successors sequence contains modules useable only as templates", nameof(successors));
         }
 
-        public Producer(ModuleTemplate moduleTemplate, List<Module> successors)
+        public Producer(Module moduleTemplate, List<Module> successors)
             : this(moduleTemplate, successors, Context.NoContext) { }
 
-        public Producer(ModuleTemplate moduleTemplate, Module successor, Context productionContext)
+        public Producer(Module moduleTemplate, Module successor, Context productionContext)
             : this(moduleTemplate, new List<Module> { successor }, productionContext) { }
 
-        public Producer(ModuleTemplate moduleTemplate, Module successor)
+        public Producer(Module moduleTemplate, Module successor)
             : this(moduleTemplate, successor, Context.NoContext) { }
+        #endregion
 
         public virtual List<Module> Produce(Module module, Context context)
         {
             if (module is null)
                 throw new ArgumentNullException(nameof(module));
 
-            if (module.GetTemplate() != ModuleTemplate)
-                throw new ArgumentException("Module do not suit template");
+            if (!module.IsMatchTemplate(ModuleTemplate))
+                throw new ArgumentException("Module do not match template");
 
             if (context is null)
                 throw new ArgumentNullException(nameof(context));
@@ -185,11 +192,14 @@ namespace KuzCode.LindenmayerSystem
                 if (successors.Any(module => module is null))
                     throw new AggregateException("Successors sequence contains null-objects");
 
+                if (successors.Any(module => module.IsUseableAsTemplateOnly))
+                    throw new ArgumentException("Successors sequence contains modules useable only as templates", nameof(successors));
+
                 return successors;
             }
             else
             {
-                return new List<Module> { module.Clone() };
+                return new List<Module> { module };
             }
         }
         
