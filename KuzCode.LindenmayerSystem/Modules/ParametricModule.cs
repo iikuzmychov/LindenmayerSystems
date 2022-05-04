@@ -1,31 +1,49 @@
 ﻿using System;
 
-namespace KuzCode.LindenmayerSystem
+namespace KuzCode.LindenmayerSystem;
+
+/*public abstract class ParametricModule : Module
 {
-    /// <summary>
-    /// Module with 1 parameter
-    /// </summary>
-    public record ParametricModule<TParameter>(char Symbol, TParameter? Parameter) : Module(Symbol)
-        where TParameter : struct
+    public ParametricModule(string name) : base(name) { }
+}*/
+
+/// <summary>
+/// <see cref="Module"/> with 1 parameter.
+/// </summary>
+public class ParametricModule<T> : Module, ICloneable, IEquatable<ParametricModule<T>>
+{
+    public T Parameter { get; }
+
+    public ParametricModule(string name, T parameter) : base(name)
     {
-        public ParametricModule(char symbol, TParameter parameter) : this(symbol, (TParameter?)parameter) { }
-
-        public override bool IsUseableAsTemplateOnly => !Parameter.HasValue;
-
-        public sealed override bool IsMatchTemplate(Module template)
-            => IsMatchTemplate(template as ParametricModule<TParameter>);
-
-        public bool IsMatchTemplate(ParametricModule<TParameter> template)
-        {
-            if (template is null)
-                throw new ArgumentNullException(nameof(template));
-
-            if (template.Parameter.HasValue)
-                return Equals(template);
-            else
-                return (this with { Parameter = null }).Equals(template);
-        }
-
-        public override string ToString() => $"{Symbol}({Parameter})";
+        Parameter = parameter ?? throw new ArgumentNullException(nameof(parameter));
     }
+
+    public override object Clone() => new ParametricModule<T>(Name, Parameter);
+
+    #region Comparing
+    public bool Equals(ParametricModule<T>? otherModule)
+    {
+        if (!base.Equals(otherModule))
+            return false;
+
+        return Parameter!.Equals(otherModule.Parameter);
+    }
+
+    public override bool Equals(object? obj) => Equals(obj as ParametricModule<T>);
+
+    public static bool operator ==(ParametricModule<T> module1, ParametricModule<T> module2)
+    {
+        if (module1 is null)
+            return module2 is null;
+        else
+            return module1.Equals(module2);
+    }
+
+    public static bool operator !=(ParametricModule<T> module1, ParametricModule<T> module2) => !(module1 == module2);
+
+    public override int GetHashCode() => Name.GetHashCode();
+    #endregion
+
+    public override string ToString() => $"{Name}({Parameter})";
 }

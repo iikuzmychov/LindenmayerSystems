@@ -2,82 +2,131 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace KuzCode.LindenmayerSystem
+namespace KuzCode.LindenmayerSystem;
+
+/// <summary>
+/// Class representing Lindenmayer system (L-system) - parallel rewriting system.
+/// </summary>
+public class LSystem : ICloneable
 {
-    public class LSystem : ICloneable
+    private readonly List<Module> _axiom;
+    private readonly List<IProducer<Module>> _producers;
+    private List<Module> _state;
+
+    /// <summary>
+    /// Start state
+    /// </summary>
+    public IReadOnlyList<Module> Axiom => _axiom.AsReadOnly();
+
+    /// <summary>
+    /// Current modules
+    /// </summary>
+    public IReadOnlyList<Module> State => _state.AsReadOnly();
+
+    /// <summary>
+    /// Producers
+    /// </summary>
+    public IReadOnlyList<IProducer<Module>> Producers => _producers.AsReadOnly();
+
+    /// <summary>
+    /// Count of steps. Starts from zero. It increments when <see cref="NextStep"/> is called
+    /// </summary>
+    public int Step { get; private set; }
+
+    /// <summary>
+    /// The event that occurs when transforming a new module
+    /// </summary>
+    public EventHandler<ModuleTransformedEventArgs>? ModuleTransformed;
+
+    /// <param name="axiom">Start state</param>
+    public LSystem(List<Module> axiom, List<IProducer<Module>> producers)
     {
-        private readonly List<Module> _axiom;
-        private List<Module> _state;
-        private readonly List<Producer> _producers;
+        ArgumentNullException.ThrowIfNull(axiom);
+        ArgumentNullException.ThrowIfNull(producers);
 
-        public IReadOnlyList<Module> Axiom => _axiom.AsReadOnly();
-        public IReadOnlyList<Module> State => _state.AsReadOnly();
-        public IReadOnlyList<Producer> Producers => _producers.AsReadOnly();
-        public int Step { get; private set; }
+        if (axiom.Any(module => module is null))
+            throw new ArgumentException("Axiom contains null modules.");
 
-        public LSystem(List<Module> axiom, List<Producer> producers)
+        _axiom     = axiom;
+        _state     = new List<Module>(axiom);
+        _producers = producers;
+    }
+
+    /// <summary>
+    /// Take the next step. All modules from <see cref="State"/> will be transformed by producers
+    /// </summary>
+    /// <returns>New state</returns>
+    public IReadOnlyList<Module> NextStep()
+    {
+        var newState = new List<Module>();
+
+        for (int i = 0; i < _state.Count; i++)
         {
-            if (axiom is null)
-                throw new ArgumentNullException(nameof(axiom));
+            List<Module>? newModules = null;
 
-            if (axiom.Any(axiom => axiom is null))
-                throw new ArgumentException("Sequence contains null-objects", nameof(axiom));
+            var currentModule     = _state[i];
+            var currentModuleType = currentModule.GetType();
+            var previousModules   = _state.Take(i);
+            var nextModules       = _state.Skip(i + 1);
+            var currentContext    = new ProductionContext(previousModules, nextModules);
 
-            if (axiom.Any(module => module.IsUseableAsTemplateOnly))
-                throw new ArgumentException("Axiom sequence contains modules useable only as templates", nameof(axiom));
-
-            if (producers is null)
-                throw new ArgumentNullException(nameof(axiom));
-
-            if (producers.Any(producer => producer is null))
-                throw new ArgumentException("Sequence contains null-objects", nameof(producers));
-
-            if (producers
-                .Any(producer1 => producers
-                    .Any(producer2 => producer1.ModuleTemplate
-                        .IsMatchTemplate(producer2.ModuleTemplate))))
+            foreach (var producer in _producers)
             {
-                throw new ArgumentException("Producers sequence contains producers with the same templates or more stringent templates", nameof(producers));
-            }
+                var producerModuleType = producer.GetInputModuleType();
 
-            _axiom     = axiom;
-            _state     = axiom;
-            _producers = producers;
-        }
+                if (currentModuleType != producerModuleType && !currentModuleType.IsSubclassOf(producerModuleType))
+                    continue;
 
-        public IReadOnlyList<Module> NextStep()
-        {
-            var newState = new List<Module>();
+                var producedModules = producer.Produce(currentModule, currentContext);
 
-            for (int i = 0; i < _state.Count; i++)
-            {
-                var currentModule = _state[i];
-
-                var producer = _producers
-                    .SingleOrDefault(producer => currentModule
-                        .IsMatchTemplate(producer.ModuleTemplate));
-
-                if (producer is not null)
+                if (producedModules.Count == 1 && producedModules[0] == currentModule)
                 {
-                    var previousModules = _state.Take(i).ToList();
-                    var nextModules     = _state.Skip(i + 1).ToList();
-                    var context         = new Producer.Context(previousModules, nextModules);
-                    var newModules      = producer.Produce(currentModule, context);
-
-                    newState.AddRange(newModules);
+                    continue;
                 }
                 else
                 {
-                    newState.Add(currentModule);
+                    newModules = producedModules;
+                    break;
                 }
             }
 
-            _state = newState;
-            Step++;
+            if (newModules is null)
+                newModules = new List<Module> { currentModule };
 
-            return State;
+            ModuleTransformed?.Invoke(this, new(currentModule, newModules));
+            newState.AddRange(newModules);
         }
 
-        public object Clone() => new LSystem(new(_axiom), _producers.Clone());
+        _state = newState;
+        Step++;
+
+        return State;
     }
+
+    /// <summary>
+    /// Take the next steps. All modules from <see cref="State"/> will be transformed by producers <paramref name="stepsCount"/>-times
+    /// </summary>
+    /// <param name="stepsCount">Steps count</param>
+    /// <returns></returns>
+    public IReadOnlyList<Module> NextSteps(int stepsCount)
+    {
+        if (stepsCount <= 0)
+            throw new ArgumentOutOfRangeException(nameof(stepsCount));
+
+        for (int i = 0; i < stepsCount; i++)
+            NextStep();
+
+        return State;
+    }
+
+    /// <summary>
+    /// Reset system to start state. Count of steps resets to zero
+    /// </summary>
+    public void Reset()
+    {
+        _state = new(_axiom);
+        Step = 0;
+    }
+
+    public object Clone() => new LSystem(new(_axiom), _producers);
 }

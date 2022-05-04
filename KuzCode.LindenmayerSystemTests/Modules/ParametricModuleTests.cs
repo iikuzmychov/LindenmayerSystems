@@ -14,15 +14,15 @@ namespace KuzCode.LindenmayerSystem.Tests
                 {
                     // modules are equals
                     new object[] { null, null, true },
-                    new object[] { new ParametricModule<int>('F', 0), new ParametricModule<int>('F', 0), true },
-                    new object[] { new ParametricModule<int>('G', 5), new ParametricModule<int>('G', 5), true },
+                    new object[] { new ParametricModule<int>("F", 0), new ParametricModule<int>("F", 0), true },
+                    new object[] { new ParametricModule<int>("G", 5), new ParametricModule<int>("G", 5), true },
 
                     // modules are not equals
-                    new object[] { null, new ParametricModule<int>('F', 0), false },
-                    new object[] { new ParametricModule<int>('F', 0), null, false },
-                    new object[] { new ParametricModule<int>('F', 0), new ParametricModule<int>('G', 0), false },
-                    new object[] { new ParametricModule<int>('G', 0), new ParametricModule<int>('F', 0), false },
-                    new object[] { new ParametricModule<int>('F', 0), new ParametricModule<int>('F', 5), false },
+                    new object[] { null, new ParametricModule<int>("F", 0), false },
+                    new object[] { new ParametricModule<int>("F", 0), null, false },
+                    new object[] { new ParametricModule<int>("F", 0), new ParametricModule<int>("G", 0), false },
+                    new object[] { new ParametricModule<int>("G", 0), new ParametricModule<int>("F", 0), false },
+                    new object[] { new ParametricModule<int>("F", 0), new ParametricModule<int>("F", 5), false },
                 };
             }
         }
@@ -44,15 +44,15 @@ namespace KuzCode.LindenmayerSystem.Tests
                 {
                     // modules are equals
                     new object[] { null, null, true },
-                    new object[] { new ParametricModule<float>('F', 0), new ParametricModule<float>('F', 0), true },
-                    new object[] { new ParametricModule<float>('G', 5), new ParametricModule<float>('G', 5), true },
+                    new object[] { new ParametricModule<float>("F", 0), new ParametricModule<float>("F", 0), true },
+                    new object[] { new ParametricModule<float>("G", 5), new ParametricModule<float>("G", 5), true },
 
                     // modules are not equals
-                    new object[] { null, new ParametricModule<float>('F', 0), false },
-                    new object[] { new ParametricModule<float>('F', 0), null, false },
-                    new object[] { new ParametricModule<float>('F', 0), new ParametricModule<float>('G', 0), false },
-                    new object[] { new ParametricModule<float>('G', 0), new ParametricModule<float>('F', 0), false },
-                    new object[] { new ParametricModule<float>('F', 0), new ParametricModule<float>('F', 5), false },
+                    new object[] { null, new ParametricModule<float>("F", 0), false },
+                    new object[] { new ParametricModule<float>("F", 0), null, false },
+                    new object[] { new ParametricModule<float>("F", 0), new ParametricModule<float>("G", 0), false },
+                    new object[] { new ParametricModule<float>("G", 0), new ParametricModule<float>("F", 0), false },
+                    new object[] { new ParametricModule<float>("F", 0), new ParametricModule<float>("F", 5), false },
                 };
             }
         }
@@ -74,15 +74,15 @@ namespace KuzCode.LindenmayerSystem.Tests
                 {
                     // modules are equals
                     new object[] { null, null, true },
-                    new object[] { new ParametricModule<double>('F', 0), new ParametricModule<double>('F', 0), true },
-                    new object[] { new ParametricModule<double>('G', 5), new ParametricModule<double>('G', 5), true },
+                    new object[] { new ParametricModule<double>("F", 0), new ParametricModule<double>("F", 0), true },
+                    new object[] { new ParametricModule<double>("G", 5), new ParametricModule<double>("G", 5), true },
 
                     // modules are not equals
-                    new object[] { null, new ParametricModule<double>('F', 0), false },
-                    new object[] { new ParametricModule<double>('F', 0), null, false },
-                    new object[] { new ParametricModule<double>('F', 0), new ParametricModule<double>('G', 0), false },
-                    new object[] { new ParametricModule<double>('G', 0), new ParametricModule<double>('F', 0), false },
-                    new object[] { new ParametricModule<double>('F', 0), new ParametricModule<double>('F', 5), false },
+                    new object[] { null, new ParametricModule<double>("F", 0), false },
+                    new object[] { new ParametricModule<double>("F", 0), null, false },
+                    new object[] { new ParametricModule<double>("F", 0), new ParametricModule<double>("G", 0), false },
+                    new object[] { new ParametricModule<double>("G", 0), new ParametricModule<double>("F", 0), false },
+                    new object[] { new ParametricModule<double>("F", 0), new ParametricModule<double>("F", 5), false },
                 };
             }
         }

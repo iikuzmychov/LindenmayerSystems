@@ -14,14 +14,14 @@ namespace KuzCode.LindenmayerSystem.Tests
                 {
                     // modules are equals
                     new object[] { null, null, true },
-                    new object[] { new Module('F'), new Module('F'), true },
-                    new object[] { new Module('G'), new Module('G'), true },
+                    new object[] { new Module("F"), new Module("F"), true },
+                    new object[] { new Module("G"), new Module("G"), true },
 
                     // modules are not equals
-                    new object[] { null, new Module('F'), false },
-                    new object[] { new Module('F'), null, false },
-                    new object[] { new Module('F'), new Module('G'), false },
-                    new object[] { new Module('G'), new Module('F'), false },
+                    new object[] { null, new Module("F"), false },
+                    new object[] { new Module("F"), null, false },
+                    new object[] { new Module("F"), new Module("G"), false },
+                    new object[] { new Module("G"), new Module("F"), false },
                 };
             }
         }
