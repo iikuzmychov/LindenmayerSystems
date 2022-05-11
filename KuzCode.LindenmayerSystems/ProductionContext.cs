@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace KuzCode.LindenmayerSystem;
+namespace KuzCode.LindenmayerSystems;
 
-public class ProductionContext : ICloneable, IEquatable<ProductionContext>
+public class ProductionContext : /*ICloneable,*/ IEquatable<ProductionContext>
 {
     public static ProductionContext NoContext =>
         new(Enumerable.Empty<Module>(), Enumerable.Empty<Module>());
@@ -22,26 +22,26 @@ public class ProductionContext : ICloneable, IEquatable<ProductionContext>
     {
         ArgumentNullException.ThrowIfNull(otherContext);
 
-        using (var currentPreviousModulesEnumerator = PreviousModules.GetEnumerator())
-        using (var otherPreviousModulesEnumerator   = otherContext.PreviousModules.GetEnumerator())
+        using (var currentPreviousModulesEnumerator = PreviousModules.Reverse().GetEnumerator())
+        using (var otherPreviousModulesEnumerator   = otherContext.PreviousModules.Reverse().GetEnumerator())
         {
             while (otherPreviousModulesEnumerator.MoveNext())
             {
                 if (!currentPreviousModulesEnumerator.MoveNext() ||
-                    currentPreviousModulesEnumerator.Current != otherPreviousModulesEnumerator.Current)
+                    !currentPreviousModulesEnumerator.Current.Equals(otherPreviousModulesEnumerator.Current))
                 {
                     return false;
                 }
             }
         }
 
-        using (var currentNextModulesEnumerator = NextModules.Reverse().GetEnumerator())
-        using (var otherNextModulesEnumerator   = otherContext.NextModules.Reverse().GetEnumerator())
+        using (var currentNextModulesEnumerator = NextModules.GetEnumerator())
+        using (var otherNextModulesEnumerator   = otherContext.NextModules.GetEnumerator())
         {
             while (otherNextModulesEnumerator.MoveNext())
             {
                 if (!currentNextModulesEnumerator.MoveNext() ||
-                    currentNextModulesEnumerator.Current != otherNextModulesEnumerator.Current)
+                    !currentNextModulesEnumerator.Current.Equals(otherNextModulesEnumerator.Current))
                 {
                     return false;
                 }
@@ -51,14 +51,14 @@ public class ProductionContext : ICloneable, IEquatable<ProductionContext>
         return true;
     }
 
-    #region Cloning
+    /*#region Cloning
     public object Clone() =>
         new ProductionContext(
             PreviousModules.Select(module => (Module)module.Clone()),
             NextModules.Select(module => (Module)module.Clone()));
 
     object ICloneable.Clone() => Clone();
-    #endregion
+    #endregion*/
 
     #region Comparing
     public bool Equals(ProductionContext? otherContext)

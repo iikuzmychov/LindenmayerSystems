@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31321.278
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KuzCode.LindenmayerSystem", "KuzCode.LindenmayerSystem\KuzCode.LindenmayerSystem.csproj", "{7A9816EB-388C-4FE4-8C8A-65C46CE78FA2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KuzCode.LindenmayerSystems", "KuzCode.LindenmayerSystems\KuzCode.LindenmayerSystems.csproj", "{7A9816EB-388C-4FE4-8C8A-65C46CE78FA2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KuzCode.LindenmayerSystemTests", "KuzCode.LindenmayerSystemTests\KuzCode.LindenmayerSystemTests.csproj", "{B11EE2BA-5A19-43E7-9C09-DA65E4285F29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KuzCode.LindenmayerSystemsTests", "KuzCode.LindenmayerSystemsTests\KuzCode.LindenmayerSystemsTests.csproj", "{B11EE2BA-5A19-43E7-9C09-DA65E4285F29}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LindenmayerSystems.ConsoleTests", "LindenmayerSystems.ConsoleTests\LindenmayerSystems.ConsoleTests.csproj", "{171D3598-9069-4832-98A0-575459751229}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{B11EE2BA-5A19-43E7-9C09-DA65E4285F29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B11EE2BA-5A19-43E7-9C09-DA65E4285F29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B11EE2BA-5A19-43E7-9C09-DA65E4285F29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{171D3598-9069-4832-98A0-575459751229}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{171D3598-9069-4832-98A0-575459751229}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{171D3598-9069-4832-98A0-575459751229}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{171D3598-9069-4832-98A0-575459751229}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

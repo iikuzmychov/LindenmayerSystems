@@ -1,17 +1,13 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using KuzCode.LindenmayerSystem;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using KuzCode.LindenmayerSystems.Extensions;
 
-namespace KuzCode.LindenmayerSystem.Tests
+namespace KuzCode.LindenmayerSystems.Tests
 {
     [TestClass]
     public class StringExtensionsTests
     {
-        #region ParseAsModules
+        /*#region ParseAsModules
         private static object[][] StringsWithModules
         {
             get
@@ -76,6 +72,6 @@ namespace KuzCode.LindenmayerSystem.Tests
 
             CollectionAssert.AreEqual(expected, actual);
         }
-        #endregion
+        #endregion*/
     }
 }
