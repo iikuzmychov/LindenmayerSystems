@@ -7,30 +7,6 @@ namespace KuzCode.LindenmayerSystems.Extensions;
 
 public static class StringExtensions
 {
-    /// <summary>
-    /// Parse each symbol from <paramref name="source"/> as new <see cref="Module"/>
-    /// </summary>
-    /// <param name="source">Source string</param>
-    /// <param name="ignoreWhiteSpaces">Should the method ignore white spaces</param>
-    /// <returns></returns>
-    public static IEnumerable<Module> ParseAsModules(this string source, bool ignoreWhiteSpaces = true)
-    {
-        var modules = new List<Module>(source.Length);
-
-        foreach (var symbol in source)
-        {
-            if (!ignoreWhiteSpaces || symbol != ' ')
-                modules.Add(new Module(symbol));
-        }
-
-        return modules;
-
-        /*foreach (var symbol in source)
-        {
-            if (!ignoreWhiteSpaces || symbol != ' ')
-                yield return new Module(symbol);
-        }*/
-    }
 
     /// <summary>
     /// Parse source string as production context
@@ -42,7 +18,7 @@ public static class StringExtensions
     /// </param>
     /// <param name="ignoreWhiteSpaces">Should the method ignore white spaces</param>
     /// <returns></returns>
-    public static ProductionContext ParseAsProductionContext(this string source, bool ignoreWhiteSpaces = true)
+    /*public static ProductionContext ParseAsProductionContext(this string source, bool ignoreWhiteSpaces = true)
     {
         if (source.Count(symbol => symbol == '<') != 1 ||
             source.Count(symbol => symbol == '>') != 1 ||
@@ -60,7 +36,7 @@ public static class StringExtensions
         var context = new ProductionContext(previousModules, nextModules);
 
         return context;
-    }
+    }*/
 
     /// <summary>
     /// Parse source string as producer

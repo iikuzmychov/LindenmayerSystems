@@ -7,9 +7,9 @@ public class RegularProduction<TPredecessor> : Production<TPredecessor>
 {
     private readonly ProductionMethod<TPredecessor> _productionMethod;
 
-    public RegularProduction(Predicate<TPredecessor> predecessorPredicate,
+    public RegularProduction(char predecessorSymbol, Predicate<TPredecessor> predecessorPredicate,
         Predicate<ProductionContext> contextPredicate, ProductionMethod<TPredecessor> productionMethod)
-        : base(predecessorPredicate, contextPredicate)
+        : base(predecessorSymbol, predecessorPredicate, contextPredicate)
     {
         _productionMethod = productionMethod ?? throw new ArgumentNullException(nameof(productionMethod));
     }

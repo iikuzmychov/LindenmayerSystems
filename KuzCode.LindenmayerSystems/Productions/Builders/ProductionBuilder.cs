@@ -9,6 +9,7 @@ public abstract class ProductionBuilder<TPredecessor, TProduction, TBuilder>
 {
     private readonly TBuilder _builderInstance;
 
+    protected char? PredecessorSymbol;
     protected Predicate<TPredecessor> PredecessorPredicate;
     protected Predicate<ProductionContext> ContextPredicate;
 
@@ -19,6 +20,13 @@ public abstract class ProductionBuilder<TPredecessor, TProduction, TBuilder>
         Reset();
     }
 
+    public TBuilder SetPredecessorSymbol(char predecessorSymbol)
+    {
+        PredecessorSymbol = predecessorSymbol;
+
+        return _builderInstance;
+    }
+
     public TBuilder SetPredecessorPredicate(Predicate<TPredecessor> predecessorPredicate)
     {
         PredecessorPredicate = predecessorPredicate ?? throw new ArgumentNullException(nameof(predecessorPredicate));
@@ -26,17 +34,18 @@ public abstract class ProductionBuilder<TPredecessor, TProduction, TBuilder>
         return _builderInstance;
     }
 
-    public TBuilder SetPredecessor(TPredecessor predecessor)
+    /*public TBuilder SetPredecessor(TPredecessor predecessor)
     {
         ArgumentNullException.ThrowIfNull(predecessor);
 
         PredecessorPredicate = actualPredecessor => actualPredecessor.Equals(predecessor);
 
         return _builderInstance;
-    }
+    }*/
 
     public virtual void Reset()
     {
+        PredecessorSymbol    = null;
         PredecessorPredicate = predecessor => true;
         ContextPredicate     = context => true;
     }

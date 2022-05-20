@@ -13,8 +13,11 @@ public abstract class Production<TPredecessor> : IProduction<TPredecessor>
     private readonly Predicate<TPredecessor> _predecessorPredicate;
     private readonly Predicate<ProductionContext> _contextPredicate;
 
-    public Production(Predicate<TPredecessor> predecessorPredicate, Predicate<ProductionContext> contextPredicate)
+    public char PredecessorSymbol { get; }
+
+    public Production(char predecessorSymbol, Predicate<TPredecessor> predecessorPredicate, Predicate<ProductionContext> contextPredicate)
     {
+        PredecessorSymbol     = predecessorSymbol;
         _predecessorPredicate = predecessorPredicate ?? throw new ArgumentNullException(nameof(predecessorPredicate));
         _contextPredicate     = contextPredicate ?? throw new ArgumentNullException(nameof(contextPredicate));
     }
@@ -23,10 +26,9 @@ public abstract class Production<TPredecessor> : IProduction<TPredecessor>
 
     #region GenerateSuccessors
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private IEnumerable<Module> GenerateSuccessorsWithoutNullChecking(TPredecessor predecessor, ProductionContext context)
     {
-        if (!_predecessorPredicate(predecessor))
+        if (predecessor.Symbol != PredecessorSymbol || !_predecessorPredicate(predecessor))
             throw new ArgumentException("The production cannot generate successors from the current predecessor.", nameof(predecessor));
 
         if (!_contextPredicate(context))
@@ -49,16 +51,19 @@ public abstract class Production<TPredecessor> : IProduction<TPredecessor>
     #endregion
 
     #region TryGenerateSuccessors
+
     private bool TryGenerateSuccessorsWithoutNullChecking(TPredecessor predecessor, ProductionContext context, out IEnumerable<Module>? successors)
     {
         try
         {
             successors = GenerateSuccessorsWithoutNullChecking(predecessor, context);
+
             return true;
         }
         catch (ArgumentException)
         {
             successors = null;
+
             return false;
         }
     }
@@ -79,6 +84,7 @@ public abstract class Production<TPredecessor> : IProduction<TPredecessor>
         if (predecessor.GetType() != typeof(TPredecessor))
         {
             successors = null;
+
             return false;
         }
 

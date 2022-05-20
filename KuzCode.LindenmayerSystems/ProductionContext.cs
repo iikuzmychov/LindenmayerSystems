@@ -4,26 +4,24 @@ using System.Linq;
 
 namespace KuzCode.LindenmayerSystems;
 
-public class ProductionContext : /*ICloneable,*/ IEquatable<ProductionContext>
+public class ProductionContext : IEquatable<ProductionContext>
 {
     public static ProductionContext NoContext =>
         new(Enumerable.Empty<Module>(), Enumerable.Empty<Module>());
 
-    public IEnumerable<Module> PreviousModules { get; }
-    public IEnumerable<Module> NextModules { get; }
+    public IEnumerable<Module> ReversedLeftContext { get; }
+    public IEnumerable<Module> RightContext { get; }
 
-    public ProductionContext(IEnumerable<Module> previousModules, IEnumerable<Module> nextModules)
+    public ProductionContext(IEnumerable<Module> reversedLeftContext, IEnumerable<Module> rightContext)
     {
-        PreviousModules = previousModules ?? throw new ArgumentNullException(nameof(previousModules));
-        NextModules     = nextModules ?? throw new ArgumentNullException(nameof(nextModules));
+        ReversedLeftContext = reversedLeftContext ?? throw new ArgumentNullException(nameof(reversedLeftContext));
+        RightContext        = rightContext ?? throw new ArgumentNullException(nameof(rightContext));
     }
 
-    public bool IsMatchContext(ProductionContext otherContext)
+    private static bool IsContextMatchOther(IEnumerable<Module> context, IEnumerable<Module> otherContext)
     {
-        ArgumentNullException.ThrowIfNull(otherContext);
-
-        using (var currentPreviousModulesEnumerator = PreviousModules.Reverse().GetEnumerator())
-        using (var otherPreviousModulesEnumerator   = otherContext.PreviousModules.Reverse().GetEnumerator())
+        using (var currentPreviousModulesEnumerator = context.GetEnumerator())
+        using (var otherPreviousModulesEnumerator   = otherContext.GetEnumerator())
         {
             while (otherPreviousModulesEnumerator.MoveNext())
             {
@@ -35,32 +33,19 @@ public class ProductionContext : /*ICloneable,*/ IEquatable<ProductionContext>
             }
         }
 
-        using (var currentNextModulesEnumerator = NextModules.GetEnumerator())
-        using (var otherNextModulesEnumerator   = otherContext.NextModules.GetEnumerator())
-        {
-            while (otherNextModulesEnumerator.MoveNext())
-            {
-                if (!currentNextModulesEnumerator.MoveNext() ||
-                    !currentNextModulesEnumerator.Current.Equals(otherNextModulesEnumerator.Current))
-                {
-                    return false;
-                }
-            }
-        }
-
         return true;
     }
 
-    /*#region Cloning
-    public object Clone() =>
-        new ProductionContext(
-            PreviousModules.Select(module => (Module)module.Clone()),
-            NextModules.Select(module => (Module)module.Clone()));
-
-    object ICloneable.Clone() => Clone();
-    #endregion*/
+    public bool IsMatchContext(ProductionContext otherContext)
+    {
+        ArgumentNullException.ThrowIfNull(otherContext);
+        
+        return IsContextMatchOther(ReversedLeftContext, otherContext.ReversedLeftContext) &&
+            IsContextMatchOther(RightContext, otherContext.RightContext);
+    }
 
     #region Comparing
+
     public bool Equals(ProductionContext? otherContext)
     {
         if (otherContext is null)
@@ -70,8 +55,8 @@ public class ProductionContext : /*ICloneable,*/ IEquatable<ProductionContext>
             return true;
 
         return
-            otherContext.PreviousModules.SequenceEqual(PreviousModules) &&
-            otherContext.NextModules.SequenceEqual(NextModules);
+            otherContext.ReversedLeftContext.SequenceEqual(ReversedLeftContext) &&
+            otherContext.RightContext.SequenceEqual(RightContext);
     }
 
     public override bool Equals(object? obj) => Equals(obj as ProductionContext);
@@ -86,9 +71,10 @@ public class ProductionContext : /*ICloneable,*/ IEquatable<ProductionContext>
 
     public static bool operator !=(ProductionContext context1, ProductionContext context2) => !(context1 == context2);
 
-    public override int GetHashCode() => (PreviousModules, NextModules).GetHashCode();
+    public override int GetHashCode() => (ReversedLeftContext, RightContext).GetHashCode();
+
     #endregion
 
     public override string ToString() =>
-        string.Join(", ", PreviousModules) + " < X > " + string.Join(", ", NextModules);
+        string.Join(", ", ReversedLeftContext) + " < X > " + string.Join(", ", RightContext);
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KuzCode.LindenmayerSystems.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -8,112 +9,125 @@ namespace KuzCode.LindenmayerSystems;
 /// <summary>
 /// Class representing the Lindenmayer system (L-system) - a parallel rewriing system.
 /// </summary>
-public class LSystem : ICloneable
+public class LSystem
 {
     private readonly Module[] _axiom;
-    private readonly IProduction<Module>[] _productions;
+    private readonly Dictionary<char, IProduction<Module>[]> _productions;
     private IList<Module> _state;
 
-    /// <summary>
-    /// Start state
-    /// </summary>
-    public IReadOnlyCollection<Module> Axiom => Array.AsReadOnly(_axiom);
-
-    /// <summary>
-    /// Current modules
-    /// </summary>
-    public IReadOnlyCollection<Module> State => new ReadOnlyCollection<Module>(_state);
-
-    /// <summary>
-    /// Producers
-    /// </summary>
-    public IReadOnlyCollection<IProduction<Module>> Productions => Array.AsReadOnly(_productions);
-
-    /// <summary>
-    /// Count of steps. Starts from zero. It increments when <see cref="NextStep"/> is called
-    /// </summary>
+    public ReadOnlyCollection<Module> Axiom => Array.AsReadOnly(_axiom);
+    public ReadOnlyCollection<Module> State => new(_state);
+    public ReadOnlyDictionary<char, IProduction<Module>[]> Productions => new(_productions);
     public int Step { get; private set; } = 0;
 
-    /// <summary>
-    /// The event that occurs when transforming a new module
-    /// </summary>
-    //public EventHandler<ModuleTransformedEventArgs>? ModuleTransformed;
-
-    /// <param name="axiom">Start state</param>
-    public LSystem(Module[] axiom, IProduction<Module>[] productions)
+    public LSystem(Module[] axiom, IEnumerable<IProduction<Module>> productions)
     {
         ArgumentNullException.ThrowIfNull(axiom);
         ArgumentNullException.ThrowIfNull(productions);
 
         if (axiom.Any(module => module is null))
-            throw new ArgumentException("Axiom contains null modules.");
+            throw new ArgumentException("Sequence contains null elements.", nameof(axiom));
 
-        _axiom       = axiom;
-        _state       = _axiom;
-        _productions = productions;
+        if (productions.Any(production => production is null))
+            throw new ArgumentException("Sequence contains null elements.", nameof(productions));
+
+        _axiom = axiom;
+        _state = _axiom;
+
+        _productions = productions
+            .GroupBy(production => production.PredecessorSymbol)
+            .ToDictionary(group => group.Key, group => group.ToArray());
     }
 
-    /// <summary>
-    /// Take the next step. All modules from <see cref="State"/> will be transformed by producers
-    /// </summary>
-    /// <returns>New state</returns>
-    public IReadOnlyCollection<Module> NextStep()
+    public static IEnumerable<Module> EnumerateAsModules(string @string, bool ignoreWhiteSpaces = true)
     {
-        var newState     = new List<Module>(_state.Count);
+        ArgumentNullException.ThrowIfNull(@string);
 
-        for (int i = 0; i < _state.Count; i++)
+        foreach (var symbol in @string)
         {
-            var predecessor  = _state[i];
-            var leftContext  = _state.Take(i);
-            var rigthContext = _state.Skip(i + 1);
-            var context      = new ProductionContext(leftContext, rigthContext);
+            if (!ignoreWhiteSpaces || char.IsWhiteSpace(symbol))
+                yield return new Module(symbol);
+        }
+    }
 
-            IEnumerable<Module>? successors = null;
+    public static Module[] ParseAsModules(string @string, bool ignoreWhiteSpaces = true)
+    {
+        ArgumentNullException.ThrowIfNull(@string);
 
-            foreach (var production in _productions)
-            {
-                if (production.TryGenerateSuccessors(predecessor, context, out successors))
-                    break;
-            }
+        int modulesCount;
+        IEnumerator<char> symbolsEnumerator;
 
-            if (successors is null)
-                newState.Add(predecessor);
-            else
-                newState.AddRange(successors);
+        if (ignoreWhiteSpaces)
+        {
+            var symbolsWithoutSpaces = @string.Where(symbol => !char.IsWhiteSpace(symbol));
 
-            //ModuleTransformed?.Invoke(this, new(predecessor, successors));
+            modulesCount = symbolsWithoutSpaces.Count();
+            symbolsEnumerator = symbolsWithoutSpaces.GetEnumerator();
+        }
+        else
+        {
+            modulesCount = @string.Length;
+            symbolsEnumerator = @string.GetEnumerator();
         }
 
-        _state = newState;
-        Step++;
+        var modules = new Module[modulesCount];
 
-        return State;
+        for (int i = 0; i < modulesCount; i++)
+        {
+            symbolsEnumerator.MoveNext();
+
+            modules[i] = new Module(symbolsEnumerator.Current);
+        }
+
+        return modules;
     }
 
-    /// <summary>
-    /// Take the next steps. All modules from <see cref="State"/> will be transformed by producers <paramref name="stepsCount"/>-times
-    /// </summary>
-    /// <param name="stepsCount">Steps count</param>
-    /// <returns></returns>
-    public IReadOnlyCollection<Module> NextSteps(int stepsCount)
+    public ReadOnlyCollection<Module> NextSteps(int stepsCount)
     {
         if (stepsCount <= 0)
             throw new ArgumentOutOfRangeException(nameof(stepsCount));
 
         for (int i = 0; i < stepsCount; i++)
-            NextStep();
+        {
+            var newState = new List<Module>(_state.Count);
+
+            for (int moduleIndex = 0; moduleIndex < _state.Count; moduleIndex++)
+            {
+                var predecessor = _state[moduleIndex];
+                var successors  = (IEnumerable<Module>?)null;
+
+                if (_productions.TryGetValue(predecessor.Symbol, out var productions))
+                {
+                    var reversedLeftContext = _state.TakeBackwards(moduleIndex - 1);
+                    var rigthContext        = _state.Skip(moduleIndex + 1);
+                    var context             = new ProductionContext(reversedLeftContext, rigthContext);
+
+                    foreach (var production in productions!)
+                    {
+                        if (production.TryGenerateSuccessors(predecessor, context, out successors))
+                            break;
+                    }
+                }
+
+                if (successors is null)
+                    newState.Add(predecessor);
+                else
+                    newState.AddRange(successors);
+            }
+
+            _state = newState;
+        }
+
+        Step += stepsCount;
 
         return State;
     }
 
-    /// <summary>
-    /// Reset system to start state. Count of steps resets to zero
-    /// </summary>
+    public ReadOnlyCollection<Module> NextStep() => NextSteps(1);
+
     public void Reset()
     {
         _state = _axiom;
-        Step   = 0;
+        Step = 0;
     }
-
-    public object Clone() => new LSystem(_axiom, _productions);
 }

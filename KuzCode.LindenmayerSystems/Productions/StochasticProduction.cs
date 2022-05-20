@@ -7,18 +7,18 @@ namespace KuzCode.LindenmayerSystems;
 public record ProductionMethodWithWeigth<TPredecessor>
     where TPredecessor : notnull, Module
 {
-    public ProductionMethod<TPredecessor> Method { get; }
     public int Weight { get; }
+    public ProductionMethod<TPredecessor> Method { get; }
 
-    public ProductionMethodWithWeigth(ProductionMethod<TPredecessor> method, int weight)
+    public ProductionMethodWithWeigth(int weight, ProductionMethod<TPredecessor> method)
     {
         ArgumentNullException.ThrowIfNull(nameof(method));
         
         if (weight <= 0)
             throw new ArgumentOutOfRangeException(nameof(weight));
 
-        Method = method;
         Weight = weight;
+        Method = method;
     }
 }
 
@@ -30,9 +30,10 @@ public class StochasticProduction<TPredecessor> : Production<TPredecessor>
     private readonly Random _random;
 
     #region Constructors
-    public StochasticProduction(Predicate<TPredecessor> predecessorPredicate, Predicate<ProductionContext> contextPredicate,
-        IEnumerable<ProductionMethodWithWeigth<TPredecessor>> productionMethods, Random random)
-        : base(predecessorPredicate, contextPredicate)
+    public StochasticProduction(char predecessorSymbol, Predicate<TPredecessor> predecessorPredicate,
+        Predicate<ProductionContext> contextPredicate, IEnumerable<ProductionMethodWithWeigth<TPredecessor>> productionMethods,
+        Random random)
+        : base(predecessorSymbol, predecessorPredicate, contextPredicate)
     {
         ArgumentNullException.ThrowIfNull(productionMethods);
         ArgumentNullException.ThrowIfNull(random);
@@ -45,18 +46,20 @@ public class StochasticProduction<TPredecessor> : Production<TPredecessor>
         _random                       = random;
     }
 
-    public StochasticProduction(Predicate<TPredecessor> predecessorPredicate, Predicate<ProductionContext> contextPredicate,
-        IEnumerable<ProductionMethodWithWeigth<TPredecessor>> productionMethods)
-        : this(predecessorPredicate, contextPredicate, productionMethods, new()) { }
+    public StochasticProduction(char predecessorSymbol, Predicate<TPredecessor> predecessorPredicate,
+        Predicate<ProductionContext> contextPredicate, IEnumerable<ProductionMethodWithWeigth<TPredecessor>> productionMethods)
+        : this(predecessorSymbol, predecessorPredicate, contextPredicate, productionMethods, new()) { }
     #endregion
 
     protected override ProductionMethod<TPredecessor> GetProductionMethod()
     {
-        var randomValue = _random.Next(1, _totalProductionMethodsWeight + 1);
+        if (_productionMethods.Length == 1)
+            return _productionMethods[0].Method;
 
         // binary search the randomly generated value for the choice of production method
         // adapted code from https://dotzero.blog/weighted-random-simple/
-        var highIndex   = _productionMethods.Length;
+        var randomValue = _random.Next(1, _totalProductionMethodsWeight + 1);
+        var highIndex   = _productionMethods.Length - 1;
         var lowIndex    = 0;
         int methodIndex;
 
@@ -75,7 +78,7 @@ public class StochasticProduction<TPredecessor> : Production<TPredecessor>
 
         if (lowIndex != highIndex)
             return _productionMethods[methodIndex].Method;
-        else if (_productionMethods[lowIndex].Weight >= randomValue)
+        else if (_productionMethods[lowIndex].Weight >= randomValue || _productionMethods.Length <= lowIndex + 1)
             return _productionMethods[lowIndex].Method;
         else
             return _productionMethods[lowIndex + 1].Method;

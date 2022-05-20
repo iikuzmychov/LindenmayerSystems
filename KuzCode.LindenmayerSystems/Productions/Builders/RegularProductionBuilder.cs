@@ -33,7 +33,7 @@ public class RegularProductionBuilder<TPredecessor>
         ArgumentNullException.ThrowIfNull(successors);
 
         if (successors.Any(successor => successor is null))
-            throw new ArgumentException("Sequence contains null-elements.", nameof(successors));
+            throw new ArgumentException("Sequence contains null elements.", nameof(successors));
 
         _productionMethod = (_, _) => successors;
 
@@ -47,10 +47,13 @@ public class RegularProductionBuilder<TPredecessor>
 
     public override RegularProduction<TPredecessor> Build()
     {
+        if (PredecessorSymbol is null)
+            throw new AggregateException("The predecessor symbol has not been set.");
+
         if (_productionMethod is null)
             throw new AggregateException("The production method has not been set.");
 
-        var production = new RegularProduction<TPredecessor>(PredecessorPredicate, ContextPredicate, _productionMethod);
+        var production = new RegularProduction<TPredecessor>(PredecessorSymbol.Value, PredecessorPredicate, ContextPredicate, _productionMethod);
 
         Reset();
 

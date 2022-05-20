@@ -5,9 +5,9 @@ VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KuzCode.LindenmayerSystems", "KuzCode.LindenmayerSystems\KuzCode.LindenmayerSystems.csproj", "{7A9816EB-388C-4FE4-8C8A-65C46CE78FA2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KuzCode.LindenmayerSystemsTests", "KuzCode.LindenmayerSystemsTests\KuzCode.LindenmayerSystemsTests.csproj", "{B11EE2BA-5A19-43E7-9C09-DA65E4285F29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KuzCode.LindenmayerSystems.Benchmarks", "KuzCode.LindenmayerSystems.Benchmarks\KuzCode.LindenmayerSystems.Benchmarks.csproj", "{EB4EF91F-C98B-47D6-9F3D-DDAF4F594503}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LindenmayerSystems.ConsoleTests", "LindenmayerSystems.ConsoleTests\LindenmayerSystems.ConsoleTests.csproj", "{171D3598-9069-4832-98A0-575459751229}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KuzCode.LindenmayerSystems.Tests", "KuzCode.LindenmayerSystems.Tests\KuzCode.LindenmayerSystems.Tests.csproj", "{B9B74FE2-097B-446A-A8AF-75F5EFC5C6CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +19,14 @@ Global
 		{7A9816EB-388C-4FE4-8C8A-65C46CE78FA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A9816EB-388C-4FE4-8C8A-65C46CE78FA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A9816EB-388C-4FE4-8C8A-65C46CE78FA2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B11EE2BA-5A19-43E7-9C09-DA65E4285F29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B11EE2BA-5A19-43E7-9C09-DA65E4285F29}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B11EE2BA-5A19-43E7-9C09-DA65E4285F29}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B11EE2BA-5A19-43E7-9C09-DA65E4285F29}.Release|Any CPU.Build.0 = Release|Any CPU
-		{171D3598-9069-4832-98A0-575459751229}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{171D3598-9069-4832-98A0-575459751229}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{171D3598-9069-4832-98A0-575459751229}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{171D3598-9069-4832-98A0-575459751229}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB4EF91F-C98B-47D6-9F3D-DDAF4F594503}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB4EF91F-C98B-47D6-9F3D-DDAF4F594503}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB4EF91F-C98B-47D6-9F3D-DDAF4F594503}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB4EF91F-C98B-47D6-9F3D-DDAF4F594503}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9B74FE2-097B-446A-A8AF-75F5EFC5C6CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9B74FE2-097B-446A-A8AF-75F5EFC5C6CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9B74FE2-097B-446A-A8AF-75F5EFC5C6CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9B74FE2-097B-446A-A8AF-75F5EFC5C6CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
