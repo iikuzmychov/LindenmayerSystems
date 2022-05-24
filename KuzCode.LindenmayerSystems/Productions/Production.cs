@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace KuzCode.LindenmayerSystems;
 
-public delegate IEnumerable<Module> ProductionMethod<TPredecessor>(TPredecessor module, ProductionContext context)
+public delegate IEnumerable<Module> ProductionMethod<TPredecessor>(TPredecessor predecessor, ProductionContext context)
     where TPredecessor : notnull, Module;
 
 public abstract class Production<TPredecessor> : IProduction<TPredecessor>
@@ -35,7 +35,7 @@ public abstract class Production<TPredecessor> : IProduction<TPredecessor>
             throw new ArgumentException("The production cannot generate successors in the current context.", nameof(predecessor));
 
         var produceMethod = GetProductionMethod();
-        var modules = produceMethod.Invoke(predecessor, context);
+        var modules       = produceMethod.Invoke(predecessor, context);
 
         return modules;
     }

@@ -9,14 +9,14 @@ public class StochasticProductionBuilder<TPredecessor>
     where TPredecessor : notnull, Module
 {
     private List<ProductionMethodWithWeigth<TPredecessor>> _productionMethods;
-    private Random? _random;
+    private Random _random;
 
     public override void Reset()
     {
         base.Reset();
 
         _productionMethods = new();
-        _random            = null;
+        _random            = new();
     }
 
     public StochasticProductionBuilder<TPredecessor> AddProductionMethod(int weight, ProductionMethod<TPredecessor> productionMethod)
@@ -29,7 +29,7 @@ public class StochasticProductionBuilder<TPredecessor>
     }
 
     public StochasticProductionBuilder<TPredecessor> AddIdentityProductionMethod(int weight) =>
-        AddProductionMethod(weight, (module, _) => new Module[] { module });
+        AddProductionMethod(weight, (module, _) => new[] { module });
 
     #region AddSuccessors
 
@@ -65,7 +65,7 @@ public class StochasticProductionBuilder<TPredecessor>
         if (_productionMethods is null)
             throw new AggregateException("Production methods have not been set.");
 
-        var production = new StochasticProduction<TPredecessor>(PredecessorSymbol.Value, PredecessorPredicate, ContextPredicate, _productionMethods, _random ?? new());
+        var production = new StochasticProduction<TPredecessor>(PredecessorSymbol.Value, PredecessorPredicate, ContextPredicate, _productionMethods, _random);
 
         Reset();
 

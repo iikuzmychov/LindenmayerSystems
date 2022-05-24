@@ -6,19 +6,18 @@ namespace KuzCode.LindenmayerSystems;
 
 public class ProductionContext : IEquatable<ProductionContext>
 {
-    public static ProductionContext NoContext =>
-        new(Enumerable.Empty<Module>(), Enumerable.Empty<Module>());
+    public IEnumerable<Module> Left { get; }
+    public IEnumerable<Module> Right { get; }
 
-    public IEnumerable<Module> ReversedLeftContext { get; }
-    public IEnumerable<Module> RightContext { get; }
+    public static ProductionContext Empty => new(Enumerable.Empty<Module>(), Enumerable.Empty<Module>());
 
-    public ProductionContext(IEnumerable<Module> reversedLeftContext, IEnumerable<Module> rightContext)
+    public ProductionContext(IEnumerable<Module> left, IEnumerable<Module> right)
     {
-        ReversedLeftContext = reversedLeftContext ?? throw new ArgumentNullException(nameof(reversedLeftContext));
-        RightContext        = rightContext ?? throw new ArgumentNullException(nameof(rightContext));
+        Left = left ?? throw new ArgumentNullException(nameof(left));
+        Right        = right ?? throw new ArgumentNullException(nameof(right));
     }
 
-    private static bool IsContextMatchOther(IEnumerable<Module> context, IEnumerable<Module> otherContext)
+    public static bool IsContextMatchOther(IEnumerable<Module> context, IEnumerable<Module> otherContext)
     {
         using (var currentPreviousModulesEnumerator = context.GetEnumerator())
         using (var otherPreviousModulesEnumerator   = otherContext.GetEnumerator())
@@ -36,12 +35,11 @@ public class ProductionContext : IEquatable<ProductionContext>
         return true;
     }
 
-    public bool IsMatchContext(ProductionContext otherContext)
+    public bool IsMatchOtherContext(ProductionContext otherContext)
     {
         ArgumentNullException.ThrowIfNull(otherContext);
         
-        return IsContextMatchOther(ReversedLeftContext, otherContext.ReversedLeftContext) &&
-            IsContextMatchOther(RightContext, otherContext.RightContext);
+        return IsContextMatchOther(Left, otherContext.Left) && IsContextMatchOther(Right, otherContext.Right);
     }
 
     #region Comparing
@@ -55,8 +53,8 @@ public class ProductionContext : IEquatable<ProductionContext>
             return true;
 
         return
-            otherContext.ReversedLeftContext.SequenceEqual(ReversedLeftContext) &&
-            otherContext.RightContext.SequenceEqual(RightContext);
+            otherContext.Left.SequenceEqual(Left) &&
+            otherContext.Right.SequenceEqual(Right);
     }
 
     public override bool Equals(object? obj) => Equals(obj as ProductionContext);
@@ -71,10 +69,10 @@ public class ProductionContext : IEquatable<ProductionContext>
 
     public static bool operator !=(ProductionContext context1, ProductionContext context2) => !(context1 == context2);
 
-    public override int GetHashCode() => (ReversedLeftContext, RightContext).GetHashCode();
+    public override int GetHashCode() => (Left, Right).GetHashCode();
 
     #endregion
 
     public override string ToString() =>
-        string.Join(", ", ReversedLeftContext) + " < X > " + string.Join(", ", RightContext);
+        string.Join(", ", Left) + " < X > " + string.Join(", ", Right);
 }

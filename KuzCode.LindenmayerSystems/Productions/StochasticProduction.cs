@@ -30,6 +30,7 @@ public class StochasticProduction<TPredecessor> : Production<TPredecessor>
     private readonly Random _random;
 
     #region Constructors
+
     public StochasticProduction(char predecessorSymbol, Predicate<TPredecessor> predecessorPredicate,
         Predicate<ProductionContext> contextPredicate, IEnumerable<ProductionMethodWithWeigth<TPredecessor>> productionMethods,
         Random random)
@@ -49,6 +50,7 @@ public class StochasticProduction<TPredecessor> : Production<TPredecessor>
     public StochasticProduction(char predecessorSymbol, Predicate<TPredecessor> predecessorPredicate,
         Predicate<ProductionContext> contextPredicate, IEnumerable<ProductionMethodWithWeigth<TPredecessor>> productionMethods)
         : this(predecessorSymbol, predecessorPredicate, contextPredicate, productionMethods, new()) { }
+
     #endregion
 
     protected override ProductionMethod<TPredecessor> GetProductionMethod()

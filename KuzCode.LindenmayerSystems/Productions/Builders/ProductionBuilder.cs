@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace KuzCode.LindenmayerSystems;
 
@@ -34,14 +35,24 @@ public abstract class ProductionBuilder<TPredecessor, TProduction, TBuilder>
         return _builderInstance;
     }
 
-    /*public TBuilder SetPredecessor(TPredecessor predecessor)
+    public TBuilder SetContextPredicate(Predicate<ProductionContext> contextPredicate)
     {
-        ArgumentNullException.ThrowIfNull(predecessor);
-
-        PredecessorPredicate = actualPredecessor => actualPredecessor.Equals(predecessor);
+        ContextPredicate = contextPredicate ?? throw new ArgumentNullException(nameof(contextPredicate));
 
         return _builderInstance;
-    }*/
+    }
+
+    public TBuilder ConfigureContextPredicate(Action<ProductionContextPredicateBuilder> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+
+        var contextPredicateBuilder = new ProductionContextPredicateBuilder();
+        configure(contextPredicateBuilder);
+
+        ContextPredicate = contextPredicateBuilder.Build();
+
+        return _builderInstance;
+    }
 
     public virtual void Reset()
     {
@@ -49,51 +60,6 @@ public abstract class ProductionBuilder<TPredecessor, TProduction, TBuilder>
         PredecessorPredicate = predecessor => true;
         ContextPredicate     = context => true;
     }
-
-    /*#region Context
-    public ProductionBuilder SetContext(ProductionContext context)
-    {
-        _productionContext = context ?? throw new ArgumentNullException(nameof(context));
-
-        return this;
-    }
-
-    public ProductionBuilder SetContextPreviousModules(IEnumerable<Module> previousModules)
-    {
-        ArgumentNullException.ThrowIfNull(previousModules);
-
-        _productionContext = new(previousModules, _productionContext.NextModules);
-
-        return this;
-    }
-
-    public ProductionBuilder SetContextPreviousModule(Module previousModule)
-    {
-        ArgumentNullException.ThrowIfNull(previousModule);
-
-        SetContextPreviousModules(new List<Module> { previousModule });
-
-        return this;
-    }
-
-    public ProductionBuilder SetContextNextModules(IEnumerable<Module> nextModules)
-    {
-        ArgumentNullException.ThrowIfNull(nextModules);
-
-        _productionContext = new(_productionContext.PreviousModules, nextModules);
-
-        return this;
-    }
-
-    public ProductionBuilder SetContextNextModule(Module nextModule)
-    {
-        ArgumentNullException.ThrowIfNull(nextModule);
-
-        SetContextNextModules(new List<Module> { nextModule });
-
-        return this;
-    }
-    #endregion*/
 
     public abstract TProduction Build();
 }

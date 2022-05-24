@@ -5,7 +5,7 @@ namespace KuzCode.LindenmayerSystems.Extensions;
 
 internal static class IListExtensions
 {
-    internal static IEnumerable<T> TakeBackwards<T>(this IList<T> source, int startIndex)
+    internal static IEnumerable<TSource> TakeBackwards<TSource>(this IList<TSource> source, int startIndex)
     {
         ArgumentNullException.ThrowIfNull(source);
 

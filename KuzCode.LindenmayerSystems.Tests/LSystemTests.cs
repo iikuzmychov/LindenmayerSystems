@@ -47,6 +47,7 @@ public class LSystemTests
                     LSystem.ParseAsModules("F"),
                     new IProduction<Module>[]
                     {
+                        // F => G
                         new RegularProductionBuilder<Module>()
                             .SetPredecessorSymbol('F')
                             .SetSuccessors(new Module('G'))
@@ -59,6 +60,7 @@ public class LSystemTests
                     LSystem.ParseAsModules("FF"),
                     new IProduction<Module>[]
                     {
+                        // F => G
                         new RegularProductionBuilder<Module>()
                             .SetPredecessorSymbol('F')
                             .SetSuccessors(new Module('G'))
@@ -71,6 +73,7 @@ public class LSystemTests
                     LSystem.ParseAsModules("F"),
                     new IProduction<Module>[]
                     {
+                        // F => F, G
                         new RegularProductionBuilder<Module>()
                             .SetPredecessorSymbol('F')
                             .SetSuccessors(new Module('F'), new Module('G'))
@@ -83,6 +86,7 @@ public class LSystemTests
                     LSystem.ParseAsModules("FG"),
                     new IProduction<Module>[]
                     {
+                        // F => F, G
                         new RegularProductionBuilder<Module>()
                             .SetPredecessorSymbol('F')
                             .SetSuccessors(new Module('F'), new Module('G'))
@@ -95,11 +99,13 @@ public class LSystemTests
                     LSystem.ParseAsModules("FG"),
                     new IProduction<Module>[]
                     {
+                        // F => F, G
                          new RegularProductionBuilder<Module>()
                             .SetPredecessorSymbol('F')
                             .SetSuccessors(new Module('F'), new Module('G'))
                             .Build(),
 
+                         // G => F
                          new RegularProductionBuilder<Module>()
                             .SetPredecessorSymbol('G')
                             .SetSuccessors(new Module('F'))
@@ -112,11 +118,13 @@ public class LSystemTests
                     LSystem.ParseAsModules("FGF"),
                     new IProduction<Module>[]
                     {
+                        // F => F, G
                         new RegularProductionBuilder<Module>()
                             .SetPredecessorSymbol('F')
                             .SetSuccessors(new Module('F'), new Module('G'))
                             .Build(),
 
+                        // G => F
                         new RegularProductionBuilder<Module>()
                             .SetPredecessorSymbol('G')
                             .SetSuccessors(new Module('F'))
@@ -124,117 +132,139 @@ public class LSystemTests
                     },
                     LSystem.ParseAsModules("FGFFG"),
                 },
-                /*new object[]
+                new object[]
                 {
-                    "FF".ParseAsModules(),
+                    LSystem.ParseAsModules("FF"),
                     new IProduction<Module>[]
                     {
-                        new ProductionBuilder()
-                            .SetContextPreviousModule(new("F"))
-                            .ConfigureMethod(builder => builder
-                                .SetModule(new("F"))
-                                .SetProducedModules(new Module("G")))
+                        // F < F > * => G
+                        new RegularProductionBuilder<Module>()
+                            .SetPredecessorSymbol('F')
+                            .ConfigureContextPredicate(builder => builder
+                                .SetLeft(new Module('F')))
+                            .SetSuccessors(new Module('G'))
                             .Build()
                     },
-                    "FG".ParseAsModules(),
+                    LSystem.ParseAsModules("FG"),
                 },
                 new object[]
                 {
-                    "FF".ParseAsModules(),
+                    LSystem.ParseAsModules("FF"),
                     new IProduction<Module>[]
                     {
-                        new ProductionBuilder()
-                            .SetContextNextModule(new("F"))
-                            .ConfigureMethod(builder => builder
-                                .SetModule(new("F"))
-                                .SetProducedModules(new Module("G")))
+                        // * < F > F => G
+                        new RegularProductionBuilder<Module>()
+                            .SetPredecessorSymbol('F')
+                            .ConfigureContextPredicate(builder => builder
+                                .SetRightContext(new Module('F')))
+                            .SetSuccessors(new Module('G'))
                             .Build()
                     },
-                    "GF".ParseAsModules(),
+                    LSystem.ParseAsModules("GF"),
                 },
                 new object[]
                 {
-                    "FFG".ParseAsModules(),
+                    LSystem.ParseAsModules("FFG"),
                     new IProduction<Module>[]
                     {
-                        new ProductionBuilder()
-                            .SetContextPreviousModule(new("F"))
-                            .SetContextNextModule(new("G"))
-                            .ConfigureMethod(builder => builder
-                                .SetModule(new("F"))
-                                .SetProducedModules(new Module("G")))
+                        // F < F > G => G
+                        new RegularProductionBuilder<Module>()
+                            .SetPredecessorSymbol('F')
+                            .ConfigureContextPredicate(builder => builder
+                                .SetLeft(new Module('F'))
+                                .SetRightContext(new Module('G')))
+                            .SetSuccessors(new Module('G'))
                             .Build()
                     },
-                    "FGG".ParseAsModules(),
-                },*/
+                    LSystem.ParseAsModules("FGG"),
+                },
 
                 // parametrical modules
                 new object[]
                 {
+                    // F(0)
                     new Module[] { new Module<int>('F', 0) },
                     new IProduction<Module>[]
                     {
+                        // F(x) => F(1)
                         new RegularProductionBuilder<Module<int>>()
                             .SetPredecessorSymbol('F')
                             .SetSuccessors(new Module<int>('F', 1))
                             .Build()
                     },
+                    // F(1)
                     new Module[] { new Module<int>('F', 1) },
                 },
-                /*new object[]
-                {
-                    new Module[] { new("D"), new Module<int>("G", 0), new Module<int>("F", 0) },
-                    new IProduction<Module>[]
-                    {
-                        new ProductionBuilder()
-                            .SetContextPreviousModule(new("G"))
-                            .ConfigureMethod(builder => builder
-                                .SetModuleCondition(module => module.Name == "F")
-                                .SetProducedModules(new Module<int>("F", 1)))
-                            .Build()
-                    },
-                    new Module[] { new("D"), new Module<int>("G", 0), new Module<int>("F", 1) },
-                },*/
                 new object[]
                 {
+                    // F(0)
                     new Module[] { new Module<int>('F', 0) },
                     new IProduction<Module>[]
                     {
+                        // F(x) => F(x+1)
                         new RegularProductionBuilder<Module<int>>()
                             .SetPredecessorSymbol('F')
-                            .SetProductionMethod((module, _) =>
-                                new List<Module> { new Module<int>(module.Symbol, module.Parameter + 1) })
+                            .SetProductionMethod((f, _) =>
+                                new[] { new Module<int>(f.Symbol, f.Parameter + 1) })
                             .Build()
                     },
+                    // F(1)
                     new Module[] { new Module<int>('F', 1) },
                 },
                 new object[]
                 {
+                    // F(1)
                     new Module[] { new Module<int>('F', 1) },
                     new IProduction<Module>[]
                     {
+                        // F(x) => F(x+1)
                         new RegularProductionBuilder<Module<int>>()
                             .SetPredecessorSymbol('F')
-                            .SetProductionMethod((module, _) =>
-                                new List<Module> { new Module<int>(module.Symbol, module.Parameter + 1) })
+                            .SetProductionMethod((f, _) =>
+                                new[] { new Module<int>(f.Symbol, f.Parameter + 1) })
                             .Build()
                     },
+                    // F(2)
                     new Module[] { new Module<int>('F', 2) },
                 },
-                /*new object[]
+                new object[]
                 {
-                    new Module[] { new Module<int>("F", 0), new("F") },
-                    new List<Producer>()
+                    // H(0), F
+                    new Module[] { new Module<int>('H', 0), new('F') },
+                    new IProduction<Module>[]
                     {
-                        new ProducerBuilder()
-                            .SetContextPreviousModule<Module<int>>(module => module.Name == "F")
-                            .SetMethod<Module>(builder => builder
-                                .SetModule(new("F"))
-                                .SetProducedModule(new("G")))
+                        // H(x) < F > * => G
+                        new RegularProductionBuilder<Module>()
+                            .SetPredecessorSymbol('F')
+                            .ConfigureContextPredicate(builder => builder
+                                .SetLeftPredicate(left => (left.FirstOrDefault() as Module<int>)?.Symbol == 'H'))
+                            .SetSuccessors(new Module('G'))
                             .Build()
                     },
-                    new Module[] { new Module<int>("F", 0), new("G") },
-                },*/
+                    // H(0), G
+                    new Module[] { new Module<int>('H', 0), new('G') },
+                },
+                new object[]
+                {
+                    // F(1), D, F(1), G(2)
+                    new Module[] { new Module<int>('F', 1), new('D'), new Module<int>('F', 1), new Module<int>('G', 2) },
+                    new IProduction<Module>[]
+                    {
+                        // * < F(y) > G(x) => F(y+x)
+                        new RegularProductionBuilder<Module<int>>()
+                            .SetPredecessorSymbol('F')
+                            .ConfigureContextPredicate(builder => builder
+                                .SetRightPredicate(context => (context.FirstOrDefault() as Module<int>)?.Symbol == 'G'))
+                            .SetProductionMethod((f, context) =>
+                            {
+                                var g = (Module<int>)context.Right.First();
+                                return new[] { new Module<int>(f.Symbol, f.Parameter + g.Parameter) };
+                            })
+                            .Build()
+                    },
+                    // F(1), D, F(3), G(2)
+                    new Module[] { new Module<int>('F', 1), new('D'), new Module<int>('F', 3), new Module<int>('G', 2) },
+                },
             };
         }
     }
